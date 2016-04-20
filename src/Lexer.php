@@ -7,11 +7,11 @@ use Xiag\Rql\Parser\Exception\SyntaxErrorException;
  */
 class Lexer
 {
-    const REGEX_VALUE       = '/(\s|\w|\-|\+|\*|\?|\:|\.|\%[0-9a-f]{2})+/Ai';
-    const REGEX_OPERATOR    = '/(?:[a-z]\w*(?=\()|\=[a-z]\w*\=|==|!=|<>|>=|<=|<|>|==|=)/Ai';
-    const REGEX_TYPE        = '/[a-z]\w*\:/Ai';
-    const REGEX_PUNCTUATION = '/[\(\)&,|]/A';
-    const REGEX_CONSTANT    = '/(null|empty|true|false)\(\)/A';
+    const REGEX_VALUE       = '/(\s|\w|\-|\+|\*|\?|\:|\.|\%[0-9a-f]{2})+/uAi';
+    const REGEX_OPERATOR    = '/(?:[a-z]\w*(?=\()|\=[a-z]\w*\=|==|!=|<>|>=|<=|<|>|==|=)/uAi';
+    const REGEX_TYPE        = '/[a-z]\w*\:/uAi';
+    const REGEX_PUNCTUATION = '/[\(\)&,|]/uA';
+    const REGEX_CONSTANT    = '/(null|empty|true|false)\(\)/uA';
 
     /**
      * @var array
@@ -195,7 +195,7 @@ class Lexer
             $this->moveCursor($value);
         } elseif (
             strlen($value) === 10 && ctype_digit($value[0]) && strpos($value, '-') === 4 &&
-            preg_match('/^(?<y>\d{4})-(?<m>\d{2})-(?<d>\d{2})$/', $value, $matches)
+            preg_match('/^(?<y>\d{4})-(?<m>\d{2})-(?<d>\d{2})$/u', $value, $matches)
         ) {
             if (!checkdate($matches['m'], $matches['d'], $matches['y'])) {
                 throw new SyntaxErrorException(sprintf('Invalid date value "%s"', $value));
@@ -205,7 +205,7 @@ class Lexer
             $this->moveCursor($value);
         } elseif (
             strlen($value) === 20 && ctype_digit($value[0]) && strpos($value, '-') === 4 && strpos($value, ':') === 13 &&
-            preg_match('/^(?<y>\d{4})-(?<m>\d{2})-(?<d>\d{2})T(?<h>\d{2}):(?<i>\d{2}):(?<s>\d{2})Z$/', $value, $matches)
+            preg_match('/^(?<y>\d{4})-(?<m>\d{2})-(?<d>\d{2})T(?<h>\d{2}):(?<i>\d{2}):(?<s>\d{2})Z$/u', $value, $matches)
         ) {
             if (!checkdate($matches['m'], $matches['d'], $matches['y']) ||
                 !($matches['h'] < 24 && $matches['i'] < 60 && $matches['s'] < 60)) {
@@ -225,9 +225,10 @@ class Lexer
             if (strlen($value) === 0) {
                 return;
             }
-
+/*
             foreach (['+', '-', ':', '*', '?'] as $invalidChar) {
                 if (strpos($value, $invalidChar) !== false) {
+                    //die($invalidChar);
                     throw new SyntaxErrorException(
                         sprintf(
                             'String value "%s" contains unencoded character "%s"',
@@ -237,7 +238,7 @@ class Lexer
                     );
                 }
             }
-
+*/
             $this->pushToken(Token::T_STRING, rawurldecode($value));
             $this->moveCursor($value);
         }
